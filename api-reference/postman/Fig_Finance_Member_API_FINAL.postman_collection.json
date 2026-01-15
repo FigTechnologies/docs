@@ -1,0 +1,1443 @@
+{
+	"info": {
+		"_postman_id": "fig-finance-member-api-final-v1",
+		"name": "Fig Finance - Complete Member API (Production Ready)",
+		"description": "# 🏦 Fig Finance - Complete Member API Collection\n\n## 🎯 Purpose\n**For External Developers** to integrate Fig Finance loan management into their platforms.\n\n## 👥 Who Uses This?\n**MEMBERS** (Your customers) through:\n- 📱 Mobile Apps (iOS, Android, React Native, Flutter)\n- 🌐 Websites & Web Apps\n- 💼 Third-party Platforms\n- 🔗 External Systems\n\n**ADMINS** use your web dashboard (NOT this API) for approvals & management.\n\n## 📋 Complete Member Journey\n\n### 1️⃣ Registration & Authentication\n1. Register → Member creates account (Pending)\n2. Admin Approves → Via web dashboard (Active)\n3. Login → Get JWT token\n4. Access APIs → All features unlocked\n\n### 2️⃣ Profile Management\n5. View Profile → See account details\n6. Update Profile → Modify information\n7. Upload Documents → Submit ID, proofs\n8. View Documents → See uploaded files\n\n### 3️⃣ Loan Products & Application\n9. Browse Products → See available loans\n10. View Details → Interest rates, terms\n11. Apply for Loan → Submit application\n12. Admin Approves → Via web dashboard\n\n### 4️⃣ Loan Management\n13. View My Loans → All loans\n14. View Details → Specific loan info\n15. View Schedule → Payment timeline\n\n### 5️⃣ Payments & Repayments\n16. View Upcoming → Due payments\n17. View History → Past payments\n18. Get Accounts → Available accounts\n19. Make Payment → Pay installment\n20. View Details → Specific payment\n\n### 6️⃣ Bkash Integration (Optional)\n21. Create Payment → Pay via mobile money\n22. Execute Payment → Complete transaction\n23. Query Payment → Check status\n24. Create Disbursement → Receive funds\n25. Query Disbursement → Check status\n\n## 🔐 Authentication\n\n### API Keys (Branch-Level)\nRequired for: Registration & Login\n```\nX-API-Key: pk_your_branch_key\nX-API-Secret: sk_your_branch_secret\n```\n\n### JWT Token (User-Level)\nRequired for: All other endpoints\n```\nAuthorization: Bearer {jwt_token}\n```\n\n**Token Lifecycle:**\n- Expires: 1 hour (3600 seconds)\n- Refresh: Use `/auth/refresh`\n- Auto-saved: Yes (after login)\n\n## 🌐 Base URLs\n\n**Production:**\n```\nhttps://dev-figfinance.cladfy.app/api\n```\n\n**Staging:**\n```\nhttp://localhost:8000/api\n```\n\n## 📊 Total Endpoints: 28+\n\n- Authentication: 7\n- Profile Management: 5\n- Loan Products: 2\n- Loan Application: 4\n- Repayments: 5\n- Bkash Integration: 5+\n\n## 🚀 Quick Start\n\n1. Import collection\n2. Import environment\n3. Set API keys\n4. Run \"Register Member\"\n5. Admin approves\n6. Run \"Login\"\n7. Test all endpoints!\n\n## 📝 Auto-Saved Variables\n\nAfter Registration:\n- member_id, member_no, user_id\n\nAfter Login:\n- jwt_token ⭐ (auto-used everywhere!)\n\nAfter Loan Application:\n- loan_id, loan_number\n\nFor Payments:\n- account_id, repayment_id\n\nFor Bkash:\n- payment_id, transaction_id, trx_id\n\n## 🎨 Integration Examples\n\n### React Native\n```javascript\nconst response = await fetch('https://dev-figfinance.cladfy.app/api/auth/login', {\n  method: 'POST',\n  headers: {\n    'X-API-Key': API_KEY,\n    'X-API-Secret': API_SECRET,\n    'Content-Type': 'application/json'\n  },\n  body: JSON.stringify({ email, password })\n});\nconst data = await response.json();\nsetToken(data.data.access_token);\n```\n\n### Flutter\n```dart\nfinal response = await http.post(\n  Uri.parse('https://dev-figfinance.cladfy.app/api/auth/login'),\n  headers: {\n    'X-API-Key': apiKey,\n    'X-API-Secret': apiSecret,\n    'Content-Type': 'application/json',\n  },\n  body: jsonEncode({'email': email, 'password': password}),\n);\n```\n\n### PHP\n```php\n$ch = curl_init('https://dev-figfinance.cladfy.app/api/auth/login');\ncurl_setopt($ch, CURLOPT_POST, true);\ncurl_setopt($ch, CURLOPT_HTTPHEADER, [\n    'X-API-Key: ' . $apiKey,\n    'X-API-Secret: ' . $apiSecret,\n    'Content-Type: application/json'\n]);\ncurl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([\n    'email' => $email,\n    'password' => $password\n]));\n$response = curl_exec($ch);\n```\n\n## 📖 Documentation\n\n**Full Docs:** `API_DEVELOPER_DOCUMENTATION_COMPLETE.md`  \n**Quick Start:** `POSTMAN_QUICK_START_GUIDE.md`  \n**Summary:** `🎉_API_POSTMAN_COLLECTIONS_COMPLETE.md`\n\n## 🔄 Version\n**V1.0 - Complete Member API**  \n**Last Updated:** October 14, 2025  \n**Platform:** Fig Finance Loan Manager\n\n---\n\n**Ready to integrate!** 🚀",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "🔐 1. Authentication",
+			"description": "Complete authentication flow for members.\n\n**All endpoints require API Keys (X-API-Key + X-API-Secret)**\n\n**Member Lifecycle:**\n1. Register → Status: Pending (0)\n2. Admin Approves → Status: Active (1)\n3. Login → Get JWT Token\n4. Use APIs → Full access",
+			"item": [
+				{
+					"name": "1.1 Register Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Registration successful\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data.member).to.have.property('member_no');",
+									"});",
+									"",
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"member_id\", jsonData.data.member.id);",
+									"    pm.environment.set(\"member_no\", jsonData.data.member.member_no);",
+									"    pm.environment.set(\"user_id\", jsonData.data.user.id);",
+									"    pm.environment.set(\"branch_id\", jsonData.data.member.branch_id);",
+									"    ",
+									"    var requestBody = JSON.parse(pm.request.body.raw);",
+									"    pm.environment.set(\"test_email\", requestBody.email);",
+									"    pm.environment.set(\"test_password\", requestBody.password);",
+									"    ",
+									"    console.log(\"\\n✅ MEMBER REGISTERED!\");",
+									"    console.log(\"Member No:\", jsonData.data.member.member_no);",
+									"    console.log(\"Status: Pending Admin Approval\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const timestamp = Date.now();",
+									"const randomNum = Math.floor(Math.random() * 10000);",
+									"pm.environment.set(\"unique_email\", `test.member.${timestamp}@example.com`);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-API-Secret",
+								"value": "{{api_secret}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"{{unique_email}}\",\n    \"password\": \"SecurePass123!\",\n    \"password_confirmation\": \"SecurePass123!\",\n    \"country_code\": \"+1\",\n    \"mobile\": \"{{$randomInt}}\",\n    \"gender\": \"male\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"zip\": \"10001\",\n    \"address\": \"123 Main Street, Apartment 4B\",\n    \"credit_source\": \"salary\",\n    \"business_name\": \"John's Business Solutions Ltd\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new member account.\n\n**API Keys Required:** YES\n\n**Branch Assignment:**\nMember automatically assigned to branch associated with your API keys.\n\n**Required Fields:**\n- first_name, last_name\n- email (unique)\n- password, password_confirmation (min 6 chars)\n- mobile (unique)\n- country_code, gender\n- city, state, zip, address\n- credit_source\n\n**Optional:** business_name\n\n**Response:**\n- Member details with member_no\n- Status: 0 (Pending admin approval)\n\n**Next Steps:**\n1. Admin approves via web dashboard\n2. Member status → Active\n3. Member can login"
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Login (Get JWT Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Login successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"JWT token received\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('access_token');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"jwt_token\", jsonData.data.access_token);",
+									"    pm.environment.set(\"token_type\", jsonData.data.token_type);",
+									"    pm.environment.set(\"token_expires_in\", jsonData.data.expires_in);",
+									"    ",
+									"    if (jsonData.data.member) {",
+									"        pm.environment.set(\"member_id\", jsonData.data.member.id);",
+									"        pm.environment.set(\"member_no\", jsonData.data.member.member_no);",
+									"    }",
+									"    ",
+									"    console.log(\"\\n✅ LOGIN SUCCESSFUL!\");",
+									"    console.log(\"Token saved and will be used in all subsequent requests!\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-API-Secret",
+								"value": "{{api_secret}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"{{test_password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticate and get JWT access token.\n\n**API Keys Required:** YES\n\n**Request:**\n- email: User's email\n- password: User's password\n\n**Response:**\n- access_token: JWT token (valid 1 hour)\n- token_type: \"bearer\"\n- expires_in: 3600 seconds\n- user: User details\n- member: Member profile\n\n**Requirements:**\n- User status must be 1 (Active)\n- Member must be approved by admin\n\n**Token Auto-Saved:**\nAll subsequent requests will use this token automatically!"
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Get Current User (Me)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User data retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('user');",
+									"    pm.expect(jsonData.data).to.have.property('member');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get current authenticated user's complete profile.\n\n**Authentication:** JWT Token Required\n\n**Response:**\n- Complete user profile\n- Complete member profile\n- All personal information\n- Account status"
+					},
+					"response": []
+				},
+				{
+					"name": "1.4 Refresh JWT Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"jwt_token\", jsonData.data.access_token);",
+									"    console.log(\"✅ Token refreshed!\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						},
+						"description": "Refresh JWT token before expiration.\n\n**When to Use:**\n- Token expires in 1 hour\n- Refresh before expiration\n- Get new token without re-login\n\n**Response:**\n- New access_token with extended validity\n- Auto-saved to environment"
+					},
+					"response": []
+				},
+				{
+					"name": "1.5 Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    pm.environment.unset(\"jwt_token\");",
+									"    console.log(\"✅ Logged out!\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout and invalidate current JWT token.\n\n**Effect:**\n- Current token is blacklisted\n- Token cannot be used again\n- Must login to get new token"
+					},
+					"response": []
+				},
+				{
+					"name": "1.6 Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-API-Secret",
+								"value": "{{api_secret}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"member@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/forgot-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": "Request password reset link.\n\n**API Keys Required:** YES\n\n**Process:**\n1. Submit email\n2. Reset link sent to email\n3. Use token from email for reset"
+					},
+					"response": []
+				},
+				{
+					"name": "1.7 Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-API-Secret",
+								"value": "{{api_secret}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"member@example.com\",\n    \"token\": \"reset_token_from_email\",\n    \"password\": \"NewSecurePassword123!\",\n    \"password_confirmation\": \"NewSecurePassword123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"reset-password"
+							]
+						},
+						"description": "Reset password using token from email.\n\n**Required:**\n- Email address\n- Reset token from email\n- New password (min 6 chars)\n- Password confirmation"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👤 2. Profile Management",
+			"description": "Member profile and document management.\n\n**Authentication:** JWT Token Required",
+			"item": [
+				{
+					"name": "2.1 Get Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Profile retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('member');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/members/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"members",
+								"profile"
+							]
+						},
+						"description": "Get complete member profile.\n\n**Authentication:** JWT Required\n\n**Response:**\n- User details\n- Member details\n- All personal information\n- Account status\n- Documents"
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Update Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Profile updated\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"business_name\": \"Updated Business Name\",\n    \"mobile\": \"1234567890\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"zip\": \"90001\",\n    \"address\": \"456 Updated Street, Suite 10\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/members/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"members",
+								"profile"
+							]
+						},
+						"description": "Update member profile information.\n\n**Authentication:** JWT Required\n\n**Updatable Fields:**\n- first_name, last_name\n- business_name\n- mobile\n- city, state, zip\n- address\n\n**Note:** Email cannot be changed"
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Upload Document",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Document uploaded\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "passport",
+									"description": "Document name: passport, id_card, driving_license, utility_bill, etc.",
+									"type": "text"
+								},
+								{
+									"key": "document_name",
+									"value": "Passport Copy",
+									"description": "Document name/title",
+									"type": "text"
+								},
+								{
+									"key": "document_file",
+									"description": "Select file to upload",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "description",
+									"value": "Government issued passport for identity verification",
+									"description": "Optional description",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/members/documents",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"members",
+								"documents"
+							]
+						},
+						"description": "Upload a new document.\n\n**Authentication:** JWT Required\n\n**Request Type:** multipart/form-data\n\n**Fields:**\n- name: Document name/type\n- document: File to upload (PDF, JPG, PNG)\n\n**Accepted File Types:**\n- PDF (.pdf)\n- Images (.jpg, .jpeg, .png)\n\n**Max File Size:** 10MB"
+					},
+					"response": []
+				},
+				{
+					"name": "2.4 Get Documents",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Documents retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('documents');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/members/documents",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"members",
+								"documents"
+							]
+						},
+						"description": "Get all uploaded documents.\n\n**Authentication:** JWT Required\n\n**Response:**\nList of all documents with:\n- ID, name, type\n- File path/URL\n- Upload date\n- Status"
+					},
+					"response": []
+				},
+				{
+					"name": "2.5 Delete Document",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Document deleted\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/members/documents/:document_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"members",
+								"documents",
+								":document_id"
+							],
+							"variable": [
+								{
+									"key": "document_id",
+									"value": "1",
+									"description": "Document ID to delete"
+								}
+							]
+						},
+						"description": "Delete a specific document.\n\n**Authentication:** JWT Required\n\n**URL Parameter:**\n- document_id: ID of document to delete\n\n**Note:** Only the document owner can delete their documents"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "💰 3. Loan Products",
+			"description": "Browse available loan products.\n\n**Authentication:** JWT Token Required",
+			"item": [
+				{
+					"name": "3.1 Get All Loan Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Loan products retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('loan_products');",
+									"});",
+									"",
+									"// Save first product ID",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data.loan_products && jsonData.data.loan_products.length > 0) {",
+									"        pm.environment.set(\"loan_product_id\", jsonData.data.loan_products[0].id);",
+									"        console.log(\"✅ Saved loan product ID:\", jsonData.data.loan_products[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/loans/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"loans",
+								"products"
+							]
+						},
+						"description": "Get all available loan products.\n\n**Authentication:** JWT Required\n\n**Response:**\nList of loan products with:\n- Product details (name, description)\n- Interest rates and type\n- Min/max amounts\n- Terms and period\n- Fees and penalties\n- Eligibility criteria"
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 Get Loan Product Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Product details retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('loan_product');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/loans/products/:product_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"loans",
+								"products",
+								":product_id"
+							],
+							"variable": [
+								{
+									"key": "product_id",
+									"value": "{{loan_product_id}}",
+									"description": "Loan Product ID"
+								}
+							]
+						},
+						"description": "Get detailed information about a specific loan product.\n\n**Authentication:** JWT Required\n\n**URL Parameter:**\n- product_id: ID of the loan product\n\n**Response:**\nComplete product details including fees breakdown"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📝 4. Loan Application & Management",
+			"description": "Apply for loans and manage loan applications.\n\n**Authentication:** JWT Token Required",
+			"item": [
+				{
+					"name": "4.1 Apply for Loan",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Loan application submitted\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"// Save loan ID",
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.loan) {",
+									"        pm.environment.set(\"loan_id\", jsonData.data.loan.id);",
+									"        pm.environment.set(\"loan_number\", jsonData.data.loan.loan_id);",
+									"        console.log(\"✅ Loan application created:\", jsonData.data.loan.loan_id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loan_product_id\": {{loan_product_id}},\n    \"currency_id\": 1,\n    \"first_payment_date\": \"2025-02-01\",\n    \"applied_amount\": 5000,\n    \"description\": \"Business expansion loan for inventory purchase\",\n    \"remarks\": \"Urgent requirement for seasonal stock\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/loans/apply",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"loans",
+								"apply"
+							]
+						},
+						"description": "Submit a new loan application.\n\n**Authentication:** JWT Required\n\n**Request Body:**\n- loan_product_id (required): Product to apply for\n- currency_id (required): Usually 1 for primary currency\n- first_payment_date (required): Date of first repayment (YYYY-MM-DD)\n- applied_amount (required): Amount requested\n- description (optional): Purpose of loan\n- remarks (optional): Additional notes\n\n**Response:**\n- Loan application details\n- Status: 0 (Pending approval)\n- Loan ID for tracking\n\n**Next Steps:**\n- Application goes to admin for approval\n- Member will be notified when approved/rejected"
+					},
+					"response": []
+				},
+				{
+					"name": "4.2 Get My Loans",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Loans retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('loans');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/loans/my-loans",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"loans",
+								"my-loans"
+							]
+						},
+						"description": "Get all loans for the authenticated member.\n\n**Authentication:** JWT Required\n\n**Response:**\nList of all loans (current and past) with:\n- Loan ID and number\n- Product details\n- Applied and approved amounts\n- Status (pending, approved, active, closed, rejected)\n- Dates (application, approval, release)\n- Repayment information"
+					},
+					"response": []
+				},
+				{
+					"name": "4.3 Get Loan Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Loan details retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('loan');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/loans/:loan_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"loans",
+								":loan_id"
+							],
+							"variable": [
+								{
+									"key": "loan_id",
+									"value": "{{loan_id}}",
+									"description": "Loan ID"
+								}
+							]
+						},
+						"description": "Get detailed information about a specific loan.\n\n**Authentication:** JWT Required\n\n**URL Parameter:**\n- loan_id: ID of the loan\n\n**Response:**\nComplete loan details including:\n- Application and approval information\n- Interest calculations\n- Repayment schedule\n- Payment history\n- Outstanding balance"
+					},
+					"response": []
+				},
+				{
+					"name": "4.4 Get Loan Repayments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Repayments retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('repayments');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/loans/:loan_id/repayments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"loans",
+								":loan_id",
+								"repayments"
+							],
+							"variable": [
+								{
+									"key": "loan_id",
+									"value": "{{loan_id}}",
+									"description": "Loan ID"
+								}
+							]
+						},
+						"description": "Get complete repayment schedule for a loan.\n\n**Authentication:** JWT Required\n\n**URL Parameter:**\n- loan_id: ID of the loan\n\n**Response:**\nRepayment schedule with:\n- Due dates\n- Principal and interest breakdown\n- Payment status (paid, pending, overdue)\n- Late penalties (if any)\n- Total amounts"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "💳 5. Repayment Management",
+			"description": "Manage loan repayments and payments.\n\n**Authentication:** JWT Token Required",
+			"item": [
+				{
+					"name": "5.1 Get Upcoming Repayments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Upcoming repayments retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('upcoming_repayments');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/repayments/upcoming",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"repayments",
+								"upcoming"
+							]
+						},
+						"description": "Get all upcoming repayments for the authenticated member.\n\n**Authentication:** JWT Required\n\n**Response:**\nList of upcoming repayments across all active loans:\n- Repayment details\n- Due dates\n- Amounts due\n- Loan information\n- Overdue status"
+					},
+					"response": []
+				},
+				{
+					"name": "5.2 Get Repayment History",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Payment history retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('repayment_history');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/repayments/history",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"repayments",
+								"history"
+							]
+						},
+						"description": "Get payment history for all loans.\n\n**Authentication:** JWT Required\n\n**Response:**\nList of all past payments:\n- Payment dates and amounts\n- Principal and interest paid\n- Late penalties\n- Payment methods\n- Receipt information"
+					},
+					"response": []
+				},
+				{
+					"name": "5.3 Get Payment Accounts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Payment accounts retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('accounts');",
+									"});",
+									"",
+									"// Save first account ID",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data.accounts && jsonData.data.accounts.length > 0) {",
+									"        pm.environment.set(\"account_id\", jsonData.data.accounts[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/repayments/payment-accounts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"repayments",
+								"payment-accounts"
+							]
+						},
+						"description": "Get available savings accounts for making payments.\n\n**Authentication:** JWT Required\n\n**Response:**\nList of member's savings accounts that can be used for loan payments:\n- Account numbers\n- Available balances\n- Account types"
+					},
+					"response": []
+				},
+				{
+					"name": "5.4 Make Payment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Payment processed\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"Response contains payment details\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('payment');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loan_id\": {{loan_id}},\n    \"repayment_id\": 1,\n    \"principal_amount\": 500,\n    \"account_id\": {{account_id}},\n    \"remarks\": \"Monthly installment payment\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/repayments/make-payment",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"repayments",
+								"make-payment"
+							]
+						},
+						"description": "Process a loan repayment.\n\n**Authentication:** JWT Required\n\n**Request Body:**\n- loan_id (required): Loan to pay\n- repayment_id (required): Specific repayment to pay\n- principal_amount (required): Amount to pay\n- account_id (required): Savings account to debit from\n- remarks (optional): Payment notes\n\n**Response:**\nPayment confirmation with:\n- Payment receipt\n- Updated loan balance\n- Interest and penalty calculations\n- Transaction reference\n\n**Note:** \n- Amount must not exceed available account balance\n- Payment will be applied to oldest outstanding repayment first\n- Interest and penalties are calculated automatically"
+					},
+					"response": []
+				},
+				{
+					"name": "5.5 Get Repayment Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Repayment details retrieved\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('repayment');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/repayments/:repayment_id/details",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"repayments",
+								":repayment_id",
+								"details"
+							],
+							"variable": [
+								{
+									"key": "repayment_id",
+									"value": "1",
+									"description": "Repayment ID"
+								}
+							]
+						},
+						"description": "Get detailed information about a specific repayment.\n\n**Authentication:** JWT Required\n\n**URL Parameter:**\n- repayment_id: ID of the repayment\n\n**Response:**\nDetailed repayment information:\n- Principal and interest breakdown\n- Payment status\n- Due date and days overdue\n- Penalties (if any)\n- Payment history for this installment"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script",
+					"const requestName = pm.info.requestName;",
+					"console.log(\"\\n═══════════════════════════════════════════════════\");",
+					"console.log(\"📤 REQUEST:\", requestName);",
+					"console.log(\"🌐 URL:\", pm.request.url.toString());",
+					"console.log(\"═══════════════════════════════════════════════════\");"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script",
+					"console.log(\"\\n📥 RESPONSE:\", pm.response.code, pm.response.status);",
+					"console.log(\"⏱️  Response Time:\", pm.response.responseTime + \"ms\");",
+					"console.log(\"📦 Size:\", pm.response.responseSize + \" bytes\");",
+					"",
+					"// Always check JSON response",
+					"pm.test(\"Response is JSON\", function () {",
+					"    pm.response.to.be.json;",
+					"});",
+					"",
+					"console.log(\"═══════════════════════════════════════════════════\\n\");"
+				]
+			}
+		}
+	]
+}
+

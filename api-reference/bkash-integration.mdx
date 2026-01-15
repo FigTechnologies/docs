@@ -1,0 +1,29 @@
+---
+title: 'Bkash Integration'
+description: 'Handling mobile money payments and disbursements'
+---
+
+Fig Finance supports Bkash for both receiving loan repayments and disbursing funds to members.
+
+## Repayments via Bkash
+
+To receive payments from a member's Bkash account:
+
+1. **Create Payment Request**: `POST /bkash/payment/create`
+   - Specify the amount and purpose.
+2. **Execute Payment**: `POST /bkash/payment/execute`
+   - Once the user authorizes the payment on their device.
+3. **Query Status**: `POST /bkash/payment/query`
+   - Verify the state of the transaction if the execution response is ambiguous.
+
+## Disbursements via Bkash
+
+To send loan funds directly to a member's Bkash wallet:
+
+1. **Create Disbursement**: `POST /bkash/disbursement/create`
+2. **Query Disbursement**: `POST /bkash/disbursement/query`
+   - Check if the funds have successfully reached the member.
+
+<Warning>
+  Ensure your branch has sufficient Bkash float balance before initiating disbursements. Disbursements will fail if the underlying wallet is empty.
+</Warning>

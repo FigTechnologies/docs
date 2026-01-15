@@ -1,0 +1,37 @@
+---
+title: 'Member Journey'
+description: 'The end-to-end integration flow for Fig Finance members'
+---
+
+Integrating Fig Finance into your platform involves a standard journey that moves from account creation to loan management.
+
+## 1. Registration & KYC
+The journey begins with registering a member. Note that members are created in a `Pending` state and require manual approval from an administrator via the Fig Finance Web Dashboard.
+
+1. **Register Member**: Use `POST /auth/register` with Branch Keys.
+2. **Upload Documents**: Submit identity and address proofs via `POST /members/documents`.
+3. **Admin Approval**: Wait for status to change to `Active` (1).
+
+## 2. Authentication
+Once active, the member can log in to receive a JWT.
+
+1. **Login**: `POST /auth/login` returns the `access_token`.
+2. **Authorize**: Use the token in the `Authorization` header for all subsequent requests.
+
+## 3. Loan Application
+After authentication, members can browse available products and apply for loans.
+
+1. **Browse Products**: `GET /loans/products` to see available terms and interest rates.
+2. **Apply**: `POST /loans/apply` using a `loan_product_id`.
+3. **Detailed Review**: Administrators will review and approve the loan application via the dashboard.
+
+## 4. Repayments
+Once a loan is disbursed, the member must manage repayments.
+
+1. **Check Schedule**: `GET /loans/{id}/schedule` to see upcoming payment dates.
+2. **Make Payment**: Use `POST /repayments/pay` using available account methods.
+3. **Verify History**: `GET /repayments/history` to track all successful installments.
+
+<Tip>
+  For a faster integration, use our [Postman Collection](/api-reference/postman) which includes auto-saved variables to handle IDs and tokens across requests.
+</Tip>
